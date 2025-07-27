@@ -1,526 +1,837 @@
 <!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:x="urn:schemas-microsoft-com:office:excel"
-      xmlns="http://www.w3.org/TR/REC-html40">
+<html lang="pt-BR">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="ProgId" content="Excel.Sheet">
-    <meta name="Generator" content="Microsoft Excel 15">
-    <title>Simulador de Risco</title>
-    <!--[if gte mso 9]>
-    <xml>
-        <x:ExcelWorkbook>
-            <x:ExcelWorksheets>
-                <x:ExcelWorksheet>
-                    <x:Name>Avaliação de Risco</x:Name>
-                    <x:WorksheetSource HRef="sheet001.htm"/>
-                </x:ExcelWorksheet>
-                <x:ExcelWorksheet>
-                    <x:Name>Projeções de Vendas</x:Name>
-                    <x:WorksheetSource HRef="sheet002.htm"/>
-                </x:ExcelWorksheet>
-                <x:ExcelWorksheet>
-                    <x:Name>Metodologia</x:Name>
-                    <x:WorksheetSource HRef="sheet003.htm"/>
-                </x:ExcelWorksheet>
-            </x:ExcelWorksheets>
-        </x:ExcelWorkbook>
-    </xml>
-    <![endif]-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Risco e Projeções - Empreendimentos</title>
     <style>
-        table { 
-            border-collapse: collapse; 
-            font-family: Calibri, Arial, sans-serif; 
-            font-size: 11pt;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f7fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab:hover {
+            background: #edf2f7;
+        }
+        
+        .tab.active {
+            background: #667eea;
+            color: white;
+            border-bottom-color: #4c51bf;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2d3748;
+        }
+        
+        .input-group input, .input-group select {
             width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
         }
-        td, th { 
-            border: 1px solid #000000; 
-            padding: 4px 8px; 
-            text-align: left; 
-            vertical-align: middle;
-            height: 20px;
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
         }
-        .header { 
-            background-color: #4472C4; 
-            color: white; 
-            font-weight: bold; 
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .results {
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .risk-score {
             text-align: center;
+            margin-bottom: 20px;
         }
-        .input { 
-            background-color: #FFF2CC; 
-            text-align: right;
+        
+        .score-display {
+            font-size: 4em;
+            font-weight: 900;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
-        .formula { 
-            background-color: #E2EFDA; 
-            text-align: right;
+        
+        .risk-level {
+            font-size: 1.5em;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 25px;
+            display: inline-block;
+            margin-bottom: 20px;
         }
-        .result { 
-            background-color: #FCE4D6; 
-            font-weight: bold; 
+        
+        .breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .breakdown-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
             text-align: center;
+            border: 1px solid #e2e8f0;
         }
-        .peso {
+        
+        .breakdown-item h4 {
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+        
+        .breakdown-item .value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #2d3748;
+        }
+        
+        .projection-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .projection-table th, .projection-table td {
+            padding: 15px;
             text-align: center;
-            background-color: #F2F2F2;
+            border-bottom: 1px solid #e2e8f0;
         }
-        .metodologia {
-            background-color: #F8F9FA;
+        
+        .projection-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
         }
-        .risk-baixo { background-color: #C6F6D5; }
-        .risk-medio { background-color: #FAF089; }
-        .risk-alto { background-color: #FED7AA; }
-        .risk-critico { background-color: #FED7D7; }
-        .regra-critica { 
-            background-color: #FFF3CD; 
-            border: 2px solid #FFEAA7; 
-            font-weight: bold; 
-            text-align: center;
+        
+        .projection-table tr:hover {
+            background: #f7fafc;
         }
-        .wide { width: 250px; }
-        .medium { width: 150px; }
-        .narrow { width: 100px; }
+        
+        .criteria-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .criteria-table th, .criteria-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .criteria-table th {
+            background: #2d3748;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .alert-info {
+            background: #bee3f8;
+            border: 1px solid #90cdf4;
+            color: #2c5282;
+        }
+        
+        /* Cores de risco */
+        .risk-baixo { color: #38a169; }
+        .risk-medio { color: #d69e2e; }
+        .risk-alto { color: #f56500; }
+        .risk-critico { color: #e53e3e; }
+        
+        .bg-baixo { background: #c6f6d5; color: #22543d; }
+        .bg-medio { background: #faf089; color: #744210; }
+        .bg-alto { background: #fed7aa; color: #9c4221; }
+        .bg-critico { background: #fed7d7; color: #742a2a; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Simulador de Risco e Projeções</h1>
+            <p>Modelo baseado na metodologia estratégica da apresentação CEO</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('risk')">📊 Avaliação de Risco</div>
+            <div class="tab" onclick="showTab('projection')">📈 Projeções de Vendas</div>
+            <div class="tab" onclick="showTab('methodology')">📋 Metodologia</div>
+        </div>
+        
+        <!-- TAB 1: AVALIAÇÃO DE RISCO -->
+        <div id="risk" class="tab-content active">
+            <div class="alert alert-info">
+                <strong>📋 Instruções:</strong> Preencha os dados do empreendimento abaixo para calcular automaticamente o Score de Risco baseado na metodologia oficial.
+            </div>
+            
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Nome do Empreendimento</label>
+                    <input type="text" id="nomeEmp" placeholder="Ex: Vitória Maracanaú">
+                </div>
+                
+                <div class="input-group">
+                    <label>Total de Unidades</label>
+                    <input type="number" id="totalUnidades" placeholder="Ex: 448">
+                </div>
+                
+                <div class="input-group">
+                    <label>Unidades Vendidas</label>
+                    <input type="number" id="unidadesVendidas" placeholder="Ex: 22">
+                </div>
+                
+                <div class="input-group">
+                    <label>Meses desde o Lançamento</label>
+                    <input type="number" id="mesesLancamento" min="1" max="12" placeholder="Ex: 1">
+                </div>
+                
+                <div class="input-group">
+                    <label>Estoque Restante (unidades)</label>
+                    <input type="number" id="estoqueRestante" placeholder="Ex: 426">
+                </div>
+                
+                <div class="input-group">
+                    <label>Meses até Entrega</label>
+                    <input type="number" id="mesesEntrega" placeholder="Ex: 36">
+                </div>
+                
+                <div class="input-group">
+                    <label>Nível de Concorrência</label>
+                    <select id="nivelConcorrencia">
+                        <option value="1">Baixa (0-1 concorrente)</option>
+                        <option value="2">Média (2-3 concorrentes)</option>
+                        <option value="3">Alta (4+ concorrentes)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Velocidade de Vendas Atual (un/mês)</label>
+                    <input type="number" id="velocidadeAtual" placeholder="Ex: 22">
+                </div>
+            </div>
+            
+            <button class="btn-primary" onclick="calcularRisco()">🎯 Calcular Score de Risco</button>
+            
+            <div id="resultadoRisco" class="results" style="display:none;">
+                <div class="risk-score">
+                    <h2>Score de Risco</h2>
+                    <div id="scoreDisplay" class="score-display">0.0</div>
+                    <div id="riskLevel" class="risk-level">Calculando...</div>
+                </div>
+                
+                <div class="breakdown">
+                    <div class="breakdown-item">
+                        <h4>Meta 30% em 6m</h4>
+                        <div id="meta30" class="value">0.0</div>
+                        <small>Peso: 40%</small>
+                    </div>
+                    <div class="breakdown-item">
+                        <h4>Estoque Crítico</h4>
+                        <div id="estoqueCritico" class="value">0.0</div>
+                        <small>Peso: 25%</small>
+                    </div>
+                    <div class="breakdown-item">
+                        <h4>Concorrência</h4>
+                        <div id="concorrencia" class="value">0.0</div>
+                        <small>Peso: 15%</small>
+                    </div>
+                    <div class="breakdown-item">
+                        <h4>Performance Mensal</h4>
+                        <div id="performance" class="value">0.0</div>
+                        <small>Peso: 10%</small>
+                    </div>
+                    <div class="breakdown-item">
+                        <h4>Sazonalidade</h4>
+                        <div id="sazonalidade" class="value">0.0</div>
+                        <small>Peso: 10%</small>
+                    </div>
+                </div>
+                
+                <div id="recomendacoes" style="margin-top: 25px;">
+                    <!-- Recomendações serão inseridas aqui -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- TAB 2: PROJEÇÕES -->
+        <div id="projection" class="tab-content">
+            <div class="alert alert-info">
+                <strong>📈 Instruções:</strong> Configure os parâmetros para gerar projeções de vendas baseadas no modelo estatístico da apresentação.
+            </div>
+            
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Nome do Empreendimento</label>
+                    <input type="text" id="nomeEmpProj" placeholder="Ex: Vitória Eusébio">
+                </div>
+                
+                <div class="input-group">
+                    <label>Unidades Restantes</label>
+                    <input type="number" id="unidadesRestantes" placeholder="Ex: 561">
+                </div>
+                
+                <div class="input-group">
+                    <label>Velocidade Atual (un/mês)</label>
+                    <input type="number" id="velocidadeProj" placeholder="Ex: 30">
+                </div>
+                
+                <div class="input-group">
+                    <label>Ticket Médio (R$)</label>
+                    <input type="number" id="ticketMedio" placeholder="Ex: 206000">
+                </div>
+                
+                <div class="input-group">
+                    <label>Previsibilidade</label>
+                    <select id="previsibilidade">
+                        <option value="alta">Alta (CV < 15%)</option>
+                        <option value="media">Média (CV 15-25%)</option>
+                        <option value="baixa">Baixa (CV > 25%)</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Período de Projeção (meses)</label>
+                    <input type="number" id="periodoProjecao" min="1" max="24" value="6" placeholder="Ex: 6">
+                </div>
+            </div>
+            
+            <button class="btn-primary" onclick="calcularProjecoes()">📊 Gerar Projeções</button>
+            
+            <div id="resultadoProjecao" class="results" style="display:none;">
+                <h3>Cenários de Projeção</h3>
+                <table class="projection-table">
+                    <thead>
+                        <tr>
+                            <th>Cenário</th>
+                            <th>Probabilidade</th>
+                            <th>Unidades Vendidas</th>
+                            <th>VGV Projetado</th>
+                            <th>Intervalo Confiança</th>
+                            <th>Data Esgotamento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaProjecoes">
+                        <!-- Projeções serão inseridas aqui -->
+                    </tbody>
+                </table>
+                
+                <div id="alertasProjecao" style="margin-top: 20px;">
+                    <!-- Alertas serão inseridos aqui -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- TAB 3: METODOLOGIA -->
+        <div id="methodology" class="tab-content">
+            <h2>📋 Metodologia de Avaliação</h2>
+            
+            <h3>Critérios de Score de Risco (Escala 0-10)</h3>
+            <table class="criteria-table">
+                <thead>
+                    <tr>
+                        <th>Critério</th>
+                        <th>Peso</th>
+                        <th>Descrição</th>
+                        <th>Cálculo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Meta 30% em 6 meses</strong></td>
+                        <td>40%</td>
+                        <td>% vendido vs 30% obrigatório pós-lançamento</td>
+                        <td>10 - (Vendido%/30% × 10)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Estoque Crítico</strong></td>
+                        <td>25%</td>
+                        <td>Unidades restantes vs tempo entrega</td>
+                        <td>(Estoque/Meses) ÷ Vel.Venda</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Concorrência</strong></td>
+                        <td>15%</td>
+                        <td>Intensidade competitiva regional</td>
+                        <td>Qtd concorrentes × ticket similar</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Performance Mensal</strong></td>
+                        <td>10%</td>
+                        <td>Ritmo vendas vs necessário p/ meta</td>
+                        <td>(Vel.Atual/Vel.Necessária) × 10</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Sazonalidade</strong></td>
+                        <td>10%</td>
+                        <td>Período de entrega vs ciclo de vendas</td>
+                        <td>Mês entrega vs histórico</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 30px;">
+                <h3>Classificação de Risco</h3>
+                <table class="criteria-table">
+                    <thead>
+                        <tr>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th>Ação Requerida</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-baixo">
+                            <td><strong>0.0 - 3.0</strong></td>
+                            <td>🟢 BAIXO</td>
+                            <td>Monitoramento padrão</td>
+                        </tr>
+                        <tr class="bg-medio">
+                            <td><strong>3.1 - 6.0</strong></td>
+                            <td>🟡 MÉDIO</td>
+                            <td>Ações preventivas</td>
+                        </tr>
+                        <tr class="bg-alto">
+                            <td><strong>6.1 - 8.0</strong></td>
+                            <td>🟠 ALTO</td>
+                            <td>Intervenção necessária</td>
+                        </tr>
+                        <tr class="bg-critico">
+                            <td><strong>8.1 - 10.0</strong></td>
+                            <td>🔴 CRÍTICO</td>
+                            <td><strong>Ação imediata CEO</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 30px; padding: 20px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeaa7;">
+                <h4>⚠️ Regra Crítica</h4>
+                <p><strong>Empreendimentos com &lt;30% vendido em 6 meses = Score mínimo 6.0 (Alto Risco)</strong></p>
+            </div>
+        </div>
+    </div>
 
-<!-- ABA 1: AVALIAÇÃO DE RISCO -->
-<h2>PLANILHA 1: AVALIAÇÃO DE RISCO</h2>
-
-<table>
-    <tr>
-        <td colspan="2" class="header">SIMULADOR DE RISCO - EMPREENDIMENTOS</td>
-    </tr>
-    <tr>
-        <td colspan="2" style="font-style: italic; text-align: center;">Metodologia baseada na apresentação CEO</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <script>
+        function showTab(tabName) {
+            // Esconder todas as abas
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(button => button.classList.remove('active'));
+            
+            // Mostrar aba selecionada
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function calcularRisco() {
+            // Coleta de dados
+            const nome = document.getElementById('nomeEmp').value || 'Empreendimento';
+            const totalUnidades = parseFloat(document.getElementById('totalUnidades').value) || 0;
+            const unidadesVendidas = parseFloat(document.getElementById('unidadesVendidas').value) || 0;
+            const mesesLancamento = parseFloat(document.getElementById('mesesLancamento').value) || 1;
+            const estoqueRestante = parseFloat(document.getElementById('estoqueRestante').value) || 0;
+            const mesesEntrega = parseFloat(document.getElementById('mesesEntrega').value) || 1;
+            const nivelConcorrencia = parseFloat(document.getElementById('nivelConcorrencia').value) || 1;
+            const velocidadeAtual = parseFloat(document.getElementById('velocidadeAtual').value) || 0;
+            
+            // Validação básica
+            if (totalUnidades === 0) {
+                alert('Por favor, preencha o total de unidades.');
+                return;
+            }
+            
+            // Cálculos
+            const percentualVendido = (unidadesVendidas / totalUnidades) * 100;
+            const percentualEsperado6m = (mesesLancamento / 6) * 30; // 30% em 6 meses
+            
+            // 1. Meta 30% em 6 meses (Peso: 40%)
+            let scoreMeta30;
+            if (mesesLancamento <= 6) {
+                const esperado = percentualEsperado6m;
+                const diferenca = percentualVendido - esperado;
+                scoreMeta30 = Math.max(0, Math.min(10, 5 - (diferenca / 5)));
+            } else {
+                // Após 6 meses, verificar se atingiu os 30%
+                scoreMeta30 = percentualVendido >= 30 ? 1 : 8;
+            }
+            
+            // 2. Estoque Crítico (Peso: 25%)
+            const velocidadeNecessaria = estoqueRestante / mesesEntrega;
+            const ratioVelocidade = velocidadeAtual > 0 ? velocidadeNecessaria / velocidadeAtual : 10;
+            const scoreEstoque = Math.max(0, Math.min(10, ratioVelocidade * 2));
+            
+            // 3. Concorrência (Peso: 15%)
+            const scoreConcorrencia = nivelConcorrencia * 2.5;
+            
+            // 4. Performance Mensal (Peso: 10%)
+            const velocidadeNecessaria30 = (totalUnidades * 0.3) / 6; // Velocidade para 30% em 6m
+            const ratioPerformance = velocidadeAtual > 0 ? velocidadeNecessaria30 / velocidadeAtual : 10;
+            const scorePerformance = Math.max(0, Math.min(10, ratioPerformance * 2));
+            
+            // 5. Sazonalidade (Peso: 10%) - Simplificado
+            const scoreSazonalidade = mesesEntrega > 24 ? 2 : (mesesEntrega > 12 ? 4 : 6);
+            
+            // Score Final Ponderado
+            const scoreTotal = (
+                scoreMeta30 * 0.40 +
+                scoreEstoque * 0.25 +
+                scoreConcorrencia * 0.15 +
+                scorePerformance * 0.10 +
+                scoreSazonalidade * 0.10
+            );
+            
+            // Aplicar regra crítica dos 30%
+            const scoreFinal = (percentualVendido < 30 && mesesLancamento >= 6) ? 
+                Math.max(scoreTotal, 6.0) : scoreTotal;
+            
+            // Determinar nível de risco e cor
+            let nivelRisco, corRisco, corFundo;
+            if (scoreFinal <= 3.0) {
+                nivelRisco = '🟢 BAIXO RISCO';
+                corRisco = '#38a169';
+                corFundo = '#c6f6d5';
+            } else if (scoreFinal <= 6.0) {
+                nivelRisco = '🟡 MÉDIO RISCO';
+                corRisco = '#d69e2e';
+                corFundo = '#faf089';
+            } else if (scoreFinal <= 8.0) {
+                nivelRisco = '🟠 ALTO RISCO';
+                corRisco = '#f56500';
+                corFundo = '#fed7aa';
+            } else {
+                nivelRisco = '🔴 CRÍTICO';
+                corRisco = '#e53e3e';
+                corFundo = '#fed7d7';
+            }
+            
+            // Atualizar interface
+            document.getElementById('scoreDisplay').textContent = scoreFinal.toFixed(1);
+            document.getElementById('scoreDisplay').style.color = corRisco;
+            
+            const riskLevelEl = document.getElementById('riskLevel');
+            riskLevelEl.textContent = nivelRisco;
+            riskLevelEl.style.backgroundColor = corFundo;
+            riskLevelEl.style.color = corRisco;
+            
+            // Breakdown
+            document.getElementById('meta30').textContent = scoreMeta30.toFixed(1);
+            document.getElementById('estoqueCritico').textContent = scoreEstoque.toFixed(1);
+            document.getElementById('concorrencia').textContent = scoreConcorrencia.toFixed(1);
+            document.getElementById('performance').textContent = scorePerformance.toFixed(1);
+            document.getElementById('sazonalidade').textContent = scoreSazonalidade.toFixed(1);
+            
+            // Recomendações
+            let recomendacoes = `<h3>📋 Análise Detalhada - ${nome}</h3>`;
+            recomendacoes += `<p><strong>Meta 30% em 6m:</strong> ${percentualVendido.toFixed(1)}% vendido em ${mesesLancamento} mês(es)</p>`;
+            
+            if (scoreFinal >= 8.0) {
+                recomendacoes += `<div class="alert" style="background: #fed7d7; border: 1px solid #f56565; color: #742a2a;">
+                    <strong>🚨 AÇÃO IMEDIATA NECESSÁRIA:</strong><br>
+                    • Definir estratégia de diferenciação competitiva<br>
+                    • Revisar pricing e condições de pagamento<br>
+                    • Intensificar campanhas de marketing<br>
+                    • Análise de concorrência detalhada
+                </div>`;
+            } else if (scoreFinal >= 6.0) {
+                recomendacoes += `<div class="alert" style="background: #fed7aa; border: 1px solid #f6ad55; color: #9c4221;">
+                    <strong>⚠️ INTERVENÇÃO NECESSÁRIA:</strong><br>
+                    • Acelerar ações comerciais<br>
+                    • Revisar estratégia de vendas<br>
+                    • Monitoramento semanal
+                </div>`;
+            } else if (scoreFinal >= 3.0) {
+                recomendacoes += `<div class="alert" style="background: #faf089; border: 1px solid #f6e05e; color: #744210;">
+                    <strong>💡 AÇÕES PREVENTIVAS:</strong><br>
+                    • Manter ritmo atual de vendas<br>
+                    • Monitoramento mensal<br>
+                    • Preparar ações de contingência
+                </div>`;
+            } else {
+                recomendacoes += `<div class="alert" style="background: #c6f6d5; border: 1px solid #68d391; color: #22543d;">
+                    <strong>✅ PERFORMANCE ADEQUADA:</strong><br>
+                    • Manter estratégia atual<br>
+                    • Monitoramento padrão<br>
+                    • Foco na qualidade das vendas
+                </div>`;
+            }
+            
+            document.getElementById('recomendacoes').innerHTML = recomendacoes;
+            document.getElementById('resultadoRisco').style.display = 'block';
+        }
+        
+        function calcularProjecoes() {
+            const nome = document.getElementById('nomeEmpProj').value || 'Empreendimento';
+            const unidadesRestantes = parseFloat(document.getElementById('unidadesRestantes').value) || 0;
+            const velocidade = parseFloat(document.getElementById('velocidadeProj').value) || 0;
+            const ticketMedio = parseFloat(document.getElementById('ticketMedio').value) || 0;
+            const previsibilidade = document.getElementById('previsibilidade').value;
+            const periodo = parseFloat(document.getElementById('periodoProjecao').value) || 6;
+            
+            if (unidadesRestantes === 0 || velocidade === 0 || ticketMedio === 0) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            // Definir variabilidade baseada na previsibilidade
+            let cv, desvio;
+            switch(previsibilidade) {
+                case 'alta':
+                    cv = 0.10; // 10%
+                    desvio = velocidade * cv;
+                    break;
+                case 'media':
+                    cv = 0.20; // 20%
+                    desvio = velocidade * cv;
+                    break;
+                case 'baixa':
+                    cv = 0.30; // 30%
+                    desvio = velocidade * cv;
+                    break;
+            }
+            
+            // Aplicar sazonalidade (simplificada)
+            const fatorSazonalidade = periodo <= 3 ? 0.85 : (periodo <= 6 ? 0.95 : 1.15);
+            const velocidadeAjustada = velocidade * fatorSazonalidade;
+            
+            // Cenários de projeção
+            const cenarios = [
+                {
+                    nome: '🟢 Otimista',
+                    probabilidade: '20%',
+                    fator: 1.2,
+                    cor: '#38a169'
+                },
+                {
+                    nome: '🟡 Realista',
+                    probabilidade: '60%',
+                    fator: 1.0,
+                    cor: '#d69e2e'
+                },
+                {
+                    nome: '🔴 Pessimista',
+                    probabilidade: '20%',
+                    fator: 0.8,
+                    cor: '#e53e3e'
+                }
+            ];
+            
+            let tabelaHTML = '';
+            let alertas = '';
+            
+            cenarios.forEach(cenario => {
+                const velocidadeCenario = velocidadeAjustada * cenario.fator;
+                const unidadesVendidas = Math.min(unidadesRestantes, velocidadeCenario * periodo);
+                const vgvProjetado = unidadesVendidas * ticketMedio;
+                const intervaloConfianca = unidadesVendidas * desvio / velocidade;
+                const mesesEsgotamento = unidadesRestantes / velocidadeCenario;
+                
+                const dataEsgotamento = new Date();
+                dataEsgotamento.setMonth(dataEsgotamento.getMonth() + Math.ceil(mesesEsgotamento));
+                const dataFormatada = dataEsgotamento.toLocaleDateString('pt-BR', {
+                    month: 'short',
+                    year: 'numeric'
+                });
+                
+                tabelaHTML += `
+                    <tr>
+                        <td style="color: ${cenario.cor}; font-weight: bold;">${cenario.nome}</td>
+                        <td>${cenario.probabilidade}</td>
+                        <td>${Math.round(unidadesVendidas)} un</td>
+                        <td>R$ ${(vgvProjetado / 1000000).toFixed(1)}M</td>
+                        <td>±${Math.round(intervaloConfianca)} un</td>
+                        <td>${dataFormatada}</td>
+                    </tr>
+                `;
+            });
+            
+            // Gerar alertas baseados na análise
+            const velocidadeRealistaAjustada = velocidadeAjustada * 1.0;
+            const unidadesRealistasPeriodo = Math.min(unidadesRestantes, velocidadeRealistaAjustada * periodo);
+            const percentualVendaPeriodo = (unidadesRealistasPeriodo / unidadesRestantes) * 100;
+            
+            if (percentualVendaPeriodo < 50 && periodo >= 6) {
+                alertas += `<div class="alert" style="background: #fed7d7; border: 1px solid #f56565; color: #742a2a;">
+                    <strong>🚨 ALERTA CRÍTICO:</strong> Projeção indica venda de apenas ${percentualVendaPeriodo.toFixed(0)}% do estoque em ${periodo} meses. 
+                    Considere ações de aceleração de vendas.
+                </div>`;
+            } else if (percentualVendaPeriodo > 90) {
+                alertas += `<div class="alert" style="background: #c6f6d5; border: 1px solid #68d391; color: #22543d;">
+                    <strong>✅ PROJEÇÃO POSITIVA:</strong> Empreendimento deve esgotar ${percentualVendaPeriodo.toFixed(0)}% do estoque em ${periodo} meses.
+                    Prepare pipeline de novos lançamentos.
+                </div>`;
+            } else {
+                alertas += `<div class="alert" style="background: #faf089; border: 1px solid #f6e05e; color: #744210;">
+                    <strong>💡 CENÁRIO MODERADO:</strong> Projeção de ${percentualVendaPeriodo.toFixed(0)}% do estoque vendido em ${periodo} meses.
+                    Monitore performance e ajuste estratégias conforme necessário.
+                </div>`;
+            }
+            
+            // Análise de velocidade necessária
+            const velocidadeNecessaria30 = (unidadesRestantes * 0.3) / 6; // Para 30% em 6 meses
+            if (velocidade < velocidadeNecessaria30) {
+                alertas += `<div class="alert" style="background: #fed7aa; border: 1px solid #f6ad55; color: #9c4221;">
+                    <strong>⚠️ VELOCIDADE INSUFICIENTE:</strong> Velocidade atual (${velocidade} un/mês) está abaixo do necessário 
+                    para meta de 30% em 6 meses (${velocidadeNecessaria30.toFixed(1)} un/mês).
+                </div>`;
+            }
+            
+            document.getElementById('tabelaProjecoes').innerHTML = tabelaHTML;
+            document.getElementById('alertasProjecao').innerHTML = alertas;
+            document.getElementById('resultadoProjecao').style.display = 'block';
+        }
+        
+        // Função para exportar dados (simulação)
+        function exportarExcel() {
+            alert('🚀 Funcionalidade de exportação para Excel será implementada!\n\nEste modelo web demonstra todas as fórmulas e lógicas que serão convertidas para Excel com:\n\n• Tabelas dinâmicas\n• Gráficos automáticos\n• Macros VBA\n• Validação de dados\n• Formatação condicional');
+        }
+        
+        // Auto-cálculo quando campos mudarem (opcional)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Adicionar listeners para auto-cálculo se desejado
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    // Auto-save ou auto-cálculo pode ser implementado aqui
+                });
+            });
+        });
+    </script>
     
-    <tr>
-        <td class="header wide">DADOS DO EMPREENDIMENTO</td>
-        <td class="header narrow">VALORES</td>
-    </tr>
-    <tr>
-        <td>Nome do Empreendimento</td>
-        <td class="input">Digite aqui</td>
-    </tr>
-    <tr>
-        <td>Total de Unidades</td>
-        <td class="input" x:num>448</td>
-    </tr>
-    <tr>
-        <td>Unidades Vendidas</td>
-        <td class="input" x:num>22</td>
-    </tr>
-    <tr>
-        <td>Meses desde Lançamento</td>
-        <td class="input" x:num>1</td>
-    </tr>
-    <tr>
-        <td>Estoque Restante</td>
-        <td class="formula">=B6-B7</td>
-    </tr>
-    <tr>
-        <td>Meses até Entrega</td>
-        <td class="input" x:num>36</td>
-    </tr>
-    <tr>
-        <td>Nível Concorrência (1-3)</td>
-        <td class="input" x:num>2</td>
-    </tr>
-    <tr>
-        <td>Velocidade Atual (un/mês)</td>
-        <td class="input" x:num>22</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    
-    <tr>
-        <td class="header">CÁLCULOS AUXILIARES</td>
-        <td class="header">FÓRMULAS</td>
-    </tr>
-    <tr>
-        <td>% Vendido</td>
-        <td class="formula">=IF(B6=0,0,B7/B6*100)</td>
-    </tr>
-    <tr>
-        <td>% Esperado 6m</td>
-        <td class="formula">=IF(B8&lt;=6,(B8/6)*30,30)</td>
-    </tr>
-    <tr>
-        <td>Velocidade Necessária</td>
-        <td class="formula">=IF(B10=0,0,B9/B10)</td>
-    </tr>
-    <tr>
-        <td>Vel. Necessária 30%</td>
-        <td class="formula">=IF(B6=0,0,(B6*0.3)/6)</td>
-    </tr>
-</table>
-
-<br>
-
-<table>
-    <tr>
-        <td colspan="3" class="header">SCORES DE RISCO (0-10)</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td class="header wide">Critério</td>
-        <td class="header narrow">Score</td>
-        <td class="header narrow">Peso</td>
-    </tr>
-    <tr>
-        <td>Meta 30% em 6m</td>
-        <td class="formula">=IF(B8&lt;=6,MAX(0,MIN(10,5-(B15-B16)/5)),IF(B15&gt;=30,1,8))</td>
-        <td class="peso">40%</td>
-    </tr>
-    <tr>
-        <td>Estoque Crítico</td>
-        <td class="formula">=IF(B17=0,10,MAX(0,MIN(10,(B17/B12)*2)))</td>
-        <td class="peso">25%</td>
-    </tr>
-    <tr>
-        <td>Concorrência</td>
-        <td class="formula">=B11*2.5</td>
-        <td class="peso">15%</td>
-    </tr>
-    <tr>
-        <td>Performance Mensal</td>
-        <td class="formula">=IF(B17=0,10,MAX(0,MIN(10,(B18/B17)*2)))</td>
-        <td class="peso">10%</td>
-    </tr>
-    <tr>
-        <td>Sazonalidade</td>
-        <td class="formula">=IF(B10&gt;24,2,IF(B10&gt;12,4,6))</td>
-        <td class="peso">10%</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-    
-    <tr>
-        <td class="header">SCORE FINAL</td>
-        <td class="header">RESULTADO</td>
-        <td class="header">&nbsp;</td>
-    </tr>
-    <tr>
-        <td>Score Total</td>
-        <td class="formula">=E4*0.4+E5*0.25+E6*0.15+E7*0.1+E8*0.1</td>
-        <td>&nbsp;</td>
-    </tr>
-    <tr>
-        <td>Score com Regra Crítica</td>
-        <td class="result">=IF(AND(B15&lt;30,B8&gt;=6),MAX(E11,6),E11)</td>
-        <td>&nbsp;</td>
-    </tr>
-    <tr>
-        <td>Nível de Risco</td>
-        <td class="result">=IF(E12&lt;=3,"🟢 BAIXO",IF(E12&lt;=6,"🟡 MÉDIO",IF(E12&lt;=8,"🟠 ALTO","🔴 CRÍTICO")))</td>
-        <td>&nbsp;</td>
-    </tr>
-</table>
-
-<br>
-
-<table>
-    <tr>
-        <td colspan="2" class="header">ANÁLISE DETALHADA</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td class="wide">Percentual Vendido:</td>
-        <td class="formula">=B15&"%"</td>
-    </tr>
-    <tr>
-        <td>Status vs Meta 30%:</td>
-        <td class="formula">=IF(B15&gt;=30,"✅ ATINGIU","❌ ABAIXO")</td>
-    </tr>
-    <tr>
-        <td>Meses desde Lançamento:</td>
-        <td class="formula">=B8</td>
-    </tr>
-    <tr>
-        <td>Score Final:</td>
-        <td class="formula">=ROUND(E12,1)</td>
-    </tr>
-    <tr>
-        <td>Classificação:</td>
-        <td class="formula">=E13</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td class="header">RECOMENDAÇÕES:</td>
-        <td class="header">&nbsp;</td>
-    </tr>
-    <tr>
-        <td colspan="2" class="formula">=IF(E12&gt;=8,"🚨 AÇÃO IMEDIATA: Definir estratégia diferenciação",IF(E12&gt;=6,"⚠️ INTERVENÇÃO: Acelerar ações comerciais",IF(E12&gt;=3,"💡 PREVENTIVO: Manter ritmo atual","✅ ADEQUADO: Monitoramento padrão")))</td>
-    </tr>
-</table>
-
-<br><br>
-
-<!-- ABA 2: PROJEÇÕES DE VENDAS -->
-<h2>PLANILHA 2: PROJEÇÕES DE VENDAS</h2>
-
-<table>
-    <tr>
-        <td colspan="2" class="header">PROJEÇÕES DE VENDAS</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td class="header wide">PARÂMETROS</td>
-        <td class="header narrow">VALORES</td>
-    </tr>
-    <tr>
-        <td>Nome Empreendimento</td>
-        <td class="input">Digite aqui</td>
-    </tr>
-    <tr>
-        <td>Unidades Restantes</td>
-        <td class="input" x:num>561</td>
-    </tr>
-    <tr>
-        <td>Velocidade Atual (un/mês)</td>
-        <td class="input" x:num>30</td>
-    </tr>
-    <tr>
-        <td>Ticket Médio (R$)</td>
-        <td class="input" x:num>206000</td>
-    </tr>
-    <tr>
-        <td>Previsibilidade (Alta/Média/Baixa)</td>
-        <td class="input">Média</td>
-    </tr>
-    <tr>
-        <td>Período Projeção (meses)</td>
-        <td class="input" x:num>6</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    
-    <tr>
-        <td class="header">CÁLCULOS BASE</td>
-        <td class="header">FÓRMULAS</td>
-    </tr>
-    <tr>
-        <td>Coef. Variação</td>
-        <td class="formula">=IF(B8="Alta",0.1,IF(B8="Média",0.2,0.3))</td>
-    </tr>
-    <tr>
-        <td>Desvio Padrão</td>
-        <td class="formula">=B6*B12</td>
-    </tr>
-    <tr>
-        <td>Fator Sazonalidade</td>
-        <td class="formula">=IF(B9&lt;=3,0.85,IF(B9&lt;=6,0.95,1.15))</td>
-    </tr>
-    <tr>
-        <td>Velocidade Ajustada</td>
-        <td class="formula">=B6*B14</td>
-    </tr>
-</table>
-
-<br>
-
-<table>
-    <tr>
-        <td colspan="7" class="header">CENÁRIOS DE PROJEÇÃO</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td class="header">Cenário</td>
-        <td class="header narrow">Prob</td>
-        <td class="header narrow">Fator</td>
-        <td class="header medium">Vel.Cenário</td>
-        <td class="header medium">Un.Vendidas</td>
-        <td class="header medium">VGV(R$)</td>
-        <td class="header medium">Esgot.(meses)</td>
-    </tr>
-    <tr>
-        <td>🟢 Otimista</td>
-        <td class="peso">20%</td>
-        <td class="peso" x:num>1.2</td>
-        <td class="formula">=B15*1.2</td>
-        <td class="formula">=MIN(B5,D4*B9)</td>
-        <td class="formula">=E4*B7</td>
-        <td class="formula">=B5/D4</td>
-    </tr>
-    <tr>
-        <td>🟡 Realista</td>
-        <td class="peso">60%</td>
-        <td class="peso" x:num>1.0</td>
-        <td class="formula">=B15*1.0</td>
-        <td class="formula">=MIN(B5,D5*B9)</td>
-        <td class="formula">=E5*B7</td>
-        <td class="formula">=B5/D5</td>
-    </tr>
-    <tr>
-        <td>🔴 Pessimista</td>
-        <td class="peso">20%</td>
-        <td class="peso" x:num>0.8</td>
-        <td class="formula">=B15*0.8</td>
-        <td class="formula">=MIN(B5,D6*B9)</td>
-        <td class="formula">=E6*B7</td>
-        <td class="formula">=B5/D6</td>
-    </tr>
-</table>
-
-<br>
-
-<table>
-    <tr>
-        <td colspan="2" class="header">ANÁLISE AUTOMÁTICA</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td class="wide">% Venda Período (Realista):</td>
-        <td class="formula">=IF(B5=0,0,E5/B5*100)</td>
-    </tr>
-    <tr>
-        <td>Status Projeção:</td>
-        <td class="formula">=IF(E12&lt;50,"🚨 CRÍTICO",IF(E12&gt;90,"✅ POSITIVO","💡 MODERADO"))</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td class="header">ALERTAS:</td>
-        <td class="header">&nbsp;</td>
-    </tr>
-    <tr>
-        <td colspan="2" class="formula">=IF(E12&lt;50,"🚨 Apenas "&ROUND(E12,0)&"% do estoque em "&B9&" meses",IF(E12&gt;90,"✅ Esgotamento de "&ROUND(E12,0)&"% em "&B9&" meses","💡 Venda moderada de "&ROUND(E12,0)&"% em "&B9&" meses"))</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td>Velocidade Necessária 30%:</td>
-        <td class="formula">=(B5*0.3)/6</td>
-    </tr>
-    <tr>
-        <td>Status Velocidade:</td>
-        <td class="formula">=IF(B6&lt;E18,"❌ INSUFICIENTE","✅ ADEQUADA")</td>
-    </tr>
-</table>
-
-<br><br>
-
-<!-- ABA 3: METODOLOGIA -->
-<h2>PLANILHA 3: METODOLOGIA</h2>
-
-<table>
-    <tr>
-        <td colspan="4" class="header">METODOLOGIA DE AVALIAÇÃO</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td class="header medium">Critério</td>
-        <td class="header narrow">Peso</td>
-        <td class="header wide">Descrição</td>
-        <td class="header medium">Fórmula</td>
-    </tr>
-    <tr>
-        <td class="metodologia">Meta 30% em 6m</td>
-        <td class="metodologia">40%</td>
-        <td class="metodologia">% vendido vs 30% obrigatório</td>
-        <td class="metodologia">10-(Vendido%/30%×10)</td>
-    </tr>
-    <tr>
-        <td class="metodologia">Estoque Crítico</td>
-        <td class="metodologia">25%</td>
-        <td class="metodologia">Unidades restantes vs tempo</td>
-        <td class="metodologia">(Estoque/Meses)÷Vel.Venda</td>
-    </tr>
-    <tr>
-        <td class="metodologia">Concorrência</td>
-        <td class="metodologia">15%</td>
-        <td class="metodologia">Intensidade competitiva</td>
-        <td class="metodologia">Qtd concorrentes × 2,5</td>
-    </tr>
-    <tr>
-        <td class="metodologia">Performance Mensal</td>
-        <td class="metodologia">10%</td>
-        <td class="metodologia">Ritmo vs necessário p/ meta</td>
-        <td class="metodologia">(Vel.Atual/Vel.Nec.)×10</td>
-    </tr>
-    <tr>
-        <td class="metodologia">Sazonalidade</td>
-        <td class="metodologia">10%</td>
-        <td class="metodologia">Período entrega vs ciclo</td>
-        <td class="metodologia">Mês entrega vs histórico</td>
-    </tr>
-</table>
-
-<br>
-
-<table>
-    <tr>
-        <td colspan="3" class="header">CLASSIFICAÇÃO DE RISCO</td>
-    </tr>
-    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-    <tr>
-        <td class="header narrow">Score</td>
-        <td class="header medium">Status</td>
-        <td class="header wide">Ação</td>
-    </tr>
-    <tr>
-        <td class="risk-baixo">0,0-3,0</td>
-        <td class="risk-baixo">🟢 BAIXO</td>
-        <td class="risk-baixo">Monitoramento padrão</td>
-    </tr>
-    <tr>
-        <td class="risk-medio">3,1-6,0</td>
-        <td class="risk-medio">🟡 MÉDIO</td>
-        <td class="risk-medio">Ações preventivas</td>
-    </tr>
-    <tr>
-        <td class="risk-alto">6,1-8,0</td>
-        <td class="risk-alto">🟠 ALTO</td>
-        <td class="risk-alto">Intervenção necessária</td>
-    </tr>
-    <tr>
-        <td class="risk-critico">8,1-10,0</td>
-        <td class="risk-critico">🔴 CRÍTICO</td>
-        <td class="risk-critico">Ação imediata CEO</td>
-    </tr>
-</table>
-
-<br>
-
-<table>
-    <tr>
-        <td colspan="2" class="regra-critica">⚠️ REGRA CRÍTICA</td>
-    </tr>
-    <tr>
-        <td colspan="2" class="regra-critica">Empreendimentos com &lt;30% vendido em 6+ meses = Score mínimo 6.0 (Alto Risco)</td>
-    </tr>
-</table>
-
-<br><br>
-
-<div style="background-color: #F0F8FF; padding: 15px; border: 2px solid #4472C4; border-radius: 5px;">
-    <h3>📋 INSTRUÇÕES DE IMPORTAÇÃO PARA EXCEL:</h3>
-    <ol style="font-family: Calibri; font-size: 12pt;">
-        <li><strong>Salve este arquivo</strong> como "SimuladorRisco.html" no seu computador</li>
-        <li><strong>Abra o Microsoft Excel</strong></li>
-        <li>Vá em <strong>Dados > Obter Dados > De Outras Fontes > Da Web</strong></li>
-        <li>Clique em <strong>"Procurar"</strong> e selecione o arquivo HTML salvo</li>
-        <li>O Excel detectará automaticamente as tabelas e fórmulas</li>
-        <li><strong>Edite apenas as células amarelas</strong> (campos de entrada)</li>
-        <li>As <strong>células verdes calculam automaticamente</strong> (não altere as fórmulas)</li>
-        <li>Use as <strong>3 planilhas</strong>: Avaliação de Risco, Projeções de Vendas e Metodologia</li>
-    </ol>
-    
-    <h4>🎯 CÉLULAS EDITÁVEIS (Amarelas):</h4>
-    <ul style="font-family: Calibri; font-size: 11pt;">
-        <li>Nome do Empreendimento</li>
-        <li>Total de Unidades, Unidades Vendidas, Meses desde Lançamento</li>
-        <li>Meses até Entrega, Nível Concorrência, Velocidade Atual</li>
-        <li>Ticket Médio, Previsibilidade, Período Projeção</li>
-    </ul>
-    
-    <h4>⚡ FUNCIONALIDADES:</h4>
-    <ul style="font-family: Calibri; font-size: 11pt;">
-        <li>✅ Cálculo automático de score de risco (0-10)</li>
-        <li>✅ Classificação por cores: Verde/Amarelo/Laranja/Vermelho</li>
-        <li>✅ Projeções de vendas em 3 cenários</li>
-        <li>✅ Recomendações automáticas baseadas no score</li>
-        <li>✅ Regra crítica para empreendimentos com baixa performance</li>
-        <li>✅ Alertas visuais e análises detalhadas</li>
-    </ul>
-</div>
-
+    <!-- Botão de exportação -->
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+        <button class="btn-primary" onclick="exportarExcel()" style="border-radius: 50px; padding: 15px 25px;">
+            📊 Exportar Excel
+        </button>
+    </div>
 </body>
 </html>
