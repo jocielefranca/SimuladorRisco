@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="ProgId" content="Excel.Sheet">
+    <meta name="Generator" content="Microsoft Excel 15">
+    <title>Simulador de Risco</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                    <x:Name>Avaliação de Risco</x:Name>
+                    <x:WorksheetSource HRef="sheet001.htm"/>
+                </x:ExcelWorksheet>
+                <x:ExcelWorksheet>
+                    <x:Name>Projeções de Vendas</x:Name>
+                    <x:WorksheetSource HRef="sheet002.htm"/>
+                </x:ExcelWorksheet>
+                <x:ExcelWorksheet>
+                    <x:Name>Metodologia</x:Name>
+                    <x:WorksheetSource HRef="sheet003.htm"/>
+                </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+    </xml>
+    <![endif]-->
+    <style>
+        table { 
+            border-collapse: collapse; 
+            font-family: Calibri, Arial, sans-serif; 
+            font-size: 11pt;
+            width: 100%;
+        }
+        td, th { 
+            border: 1px solid #000000; 
+            padding: 4px 8px; 
+            text-align: left; 
+            vertical-align: middle;
+            height: 20px;
+        }
+        .header { 
+            background-color: #4472C4; 
+            color: white; 
+            font-weight: bold; 
+            text-align: center;
+        }
+        .input { 
+            background-color: #FFF2CC; 
+            text-align: right;
+        }
+        .formula { 
+            background-color: #E2EFDA; 
+            text-align: right;
+        }
+        .result { 
+            background-color: #FCE4D6; 
+            font-weight: bold; 
+            text-align: center;
+        }
+        .peso {
+            text-align: center;
+            background-color: #F2F2F2;
+        }
+        .metodologia {
+            background-color: #F8F9FA;
+        }
+        .risk-baixo { background-color: #C6F6D5; }
+        .risk-medio { background-color: #FAF089; }
+        .risk-alto { background-color: #FED7AA; }
+        .risk-critico { background-color: #FED7D7; }
+        .regra-critica { 
+            background-color: #FFF3CD; 
+            border: 2px solid #FFEAA7; 
+            font-weight: bold; 
+            text-align: center;
+        }
+        .wide { width: 250px; }
+        .medium { width: 150px; }
+        .narrow { width: 100px; }
+    </style>
+</head>
+<body>
+
+<!-- ABA 1: AVALIAÇÃO DE RISCO -->
+<h2>PLANILHA 1: AVALIAÇÃO DE RISCO</h2>
+
+<table>
+    <tr>
+        <td colspan="2" class="header">SIMULADOR DE RISCO - EMPREENDIMENTOS</td>
+    </tr>
+    <tr>
+        <td colspan="2" style="font-style: italic; text-align: center;">Metodologia baseada na apresentação CEO</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    
+    <tr>
+        <td class="header wide">DADOS DO EMPREENDIMENTO</td>
+        <td class="header narrow">VALORES</td>
+    </tr>
+    <tr>
+        <td>Nome do Empreendimento</td>
+        <td class="input">Digite aqui</td>
+    </tr>
+    <tr>
+        <td>Total de Unidades</td>
+        <td class="input" x:num>448</td>
+    </tr>
+    <tr>
+        <td>Unidades Vendidas</td>
+        <td class="input" x:num>22</td>
+    </tr>
+    <tr>
+        <td>Meses desde Lançamento</td>
+        <td class="input" x:num>1</td>
+    </tr>
+    <tr>
+        <td>Estoque Restante</td>
+        <td class="formula">=B6-B7</td>
+    </tr>
+    <tr>
+        <td>Meses até Entrega</td>
+        <td class="input" x:num>36</td>
+    </tr>
+    <tr>
+        <td>Nível Concorrência (1-3)</td>
+        <td class="input" x:num>2</td>
+    </tr>
+    <tr>
+        <td>Velocidade Atual (un/mês)</td>
+        <td class="input" x:num>22</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    
+    <tr>
+        <td class="header">CÁLCULOS AUXILIARES</td>
+        <td class="header">FÓRMULAS</td>
+    </tr>
+    <tr>
+        <td>% Vendido</td>
+        <td class="formula">=IF(B6=0,0,B7/B6*100)</td>
+    </tr>
+    <tr>
+        <td>% Esperado 6m</td>
+        <td class="formula">=IF(B8&lt;=6,(B8/6)*30,30)</td>
+    </tr>
+    <tr>
+        <td>Velocidade Necessária</td>
+        <td class="formula">=IF(B10=0,0,B9/B10)</td>
+    </tr>
+    <tr>
+        <td>Vel. Necessária 30%</td>
+        <td class="formula">=IF(B6=0,0,(B6*0.3)/6)</td>
+    </tr>
+</table>
+
+<br>
+
+<table>
+    <tr>
+        <td colspan="3" class="header">SCORES DE RISCO (0-10)</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td class="header wide">Critério</td>
+        <td class="header narrow">Score</td>
+        <td class="header narrow">Peso</td>
+    </tr>
+    <tr>
+        <td>Meta 30% em 6m</td>
+        <td class="formula">=IF(B8&lt;=6,MAX(0,MIN(10,5-(B15-B16)/5)),IF(B15&gt;=30,1,8))</td>
+        <td class="peso">40%</td>
+    </tr>
+    <tr>
+        <td>Estoque Crítico</td>
+        <td class="formula">=IF(B17=0,10,MAX(0,MIN(10,(B17/B12)*2)))</td>
+        <td class="peso">25%</td>
+    </tr>
+    <tr>
+        <td>Concorrência</td>
+        <td class="formula">=B11*2.5</td>
+        <td class="peso">15%</td>
+    </tr>
+    <tr>
+        <td>Performance Mensal</td>
+        <td class="formula">=IF(B17=0,10,MAX(0,MIN(10,(B18/B17)*2)))</td>
+        <td class="peso">10%</td>
+    </tr>
+    <tr>
+        <td>Sazonalidade</td>
+        <td class="formula">=IF(B10&gt;24,2,IF(B10&gt;12,4,6))</td>
+        <td class="peso">10%</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    
+    <tr>
+        <td class="header">SCORE FINAL</td>
+        <td class="header">RESULTADO</td>
+        <td class="header">&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Score Total</td>
+        <td class="formula">=E4*0.4+E5*0.25+E6*0.15+E7*0.1+E8*0.1</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Score com Regra Crítica</td>
+        <td class="result">=IF(AND(B15&lt;30,B8&gt;=6),MAX(E11,6),E11)</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td>Nível de Risco</td>
+        <td class="result">=IF(E12&lt;=3,"🟢 BAIXO",IF(E12&lt;=6,"🟡 MÉDIO",IF(E12&lt;=8,"🟠 ALTO","🔴 CRÍTICO")))</td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+<br>
+
+<table>
+    <tr>
+        <td colspan="2" class="header">ANÁLISE DETALHADA</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td class="wide">Percentual Vendido:</td>
+        <td class="formula">=B15&"%"</td>
+    </tr>
+    <tr>
+        <td>Status vs Meta 30%:</td>
+        <td class="formula">=IF(B15&gt;=30,"✅ ATINGIU","❌ ABAIXO")</td>
+    </tr>
+    <tr>
+        <td>Meses desde Lançamento:</td>
+        <td class="formula">=B8</td>
+    </tr>
+    <tr>
+        <td>Score Final:</td>
+        <td class="formula">=ROUND(E12,1)</td>
+    </tr>
+    <tr>
+        <td>Classificação:</td>
+        <td class="formula">=E13</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td class="header">RECOMENDAÇÕES:</td>
+        <td class="header">&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="2" class="formula">=IF(E12&gt;=8,"🚨 AÇÃO IMEDIATA: Definir estratégia diferenciação",IF(E12&gt;=6,"⚠️ INTERVENÇÃO: Acelerar ações comerciais",IF(E12&gt;=3,"💡 PREVENTIVO: Manter ritmo atual","✅ ADEQUADO: Monitoramento padrão")))</td>
+    </tr>
+</table>
+
+<br><br>
+
+<!-- ABA 2: PROJEÇÕES DE VENDAS -->
+<h2>PLANILHA 2: PROJEÇÕES DE VENDAS</h2>
+
+<table>
+    <tr>
+        <td colspan="2" class="header">PROJEÇÕES DE VENDAS</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td class="header wide">PARÂMETROS</td>
+        <td class="header narrow">VALORES</td>
+    </tr>
+    <tr>
+        <td>Nome Empreendimento</td>
+        <td class="input">Digite aqui</td>
+    </tr>
+    <tr>
+        <td>Unidades Restantes</td>
+        <td class="input" x:num>561</td>
+    </tr>
+    <tr>
+        <td>Velocidade Atual (un/mês)</td>
+        <td class="input" x:num>30</td>
+    </tr>
+    <tr>
+        <td>Ticket Médio (R$)</td>
+        <td class="input" x:num>206000</td>
+    </tr>
+    <tr>
+        <td>Previsibilidade (Alta/Média/Baixa)</td>
+        <td class="input">Média</td>
+    </tr>
+    <tr>
+        <td>Período Projeção (meses)</td>
+        <td class="input" x:num>6</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    
+    <tr>
+        <td class="header">CÁLCULOS BASE</td>
+        <td class="header">FÓRMULAS</td>
+    </tr>
+    <tr>
+        <td>Coef. Variação</td>
+        <td class="formula">=IF(B8="Alta",0.1,IF(B8="Média",0.2,0.3))</td>
+    </tr>
+    <tr>
+        <td>Desvio Padrão</td>
+        <td class="formula">=B6*B12</td>
+    </tr>
+    <tr>
+        <td>Fator Sazonalidade</td>
+        <td class="formula">=IF(B9&lt;=3,0.85,IF(B9&lt;=6,0.95,1.15))</td>
+    </tr>
+    <tr>
+        <td>Velocidade Ajustada</td>
+        <td class="formula">=B6*B14</td>
+    </tr>
+</table>
+
+<br>
+
+<table>
+    <tr>
+        <td colspan="7" class="header">CENÁRIOS DE PROJEÇÃO</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td class="header">Cenário</td>
+        <td class="header narrow">Prob</td>
+        <td class="header narrow">Fator</td>
+        <td class="header medium">Vel.Cenário</td>
+        <td class="header medium">Un.Vendidas</td>
+        <td class="header medium">VGV(R$)</td>
+        <td class="header medium">Esgot.(meses)</td>
+    </tr>
+    <tr>
+        <td>🟢 Otimista</td>
+        <td class="peso">20%</td>
+        <td class="peso" x:num>1.2</td>
+        <td class="formula">=B15*1.2</td>
+        <td class="formula">=MIN(B5,D4*B9)</td>
+        <td class="formula">=E4*B7</td>
+        <td class="formula">=B5/D4</td>
+    </tr>
+    <tr>
+        <td>🟡 Realista</td>
+        <td class="peso">60%</td>
+        <td class="peso" x:num>1.0</td>
+        <td class="formula">=B15*1.0</td>
+        <td class="formula">=MIN(B5,D5*B9)</td>
+        <td class="formula">=E5*B7</td>
+        <td class="formula">=B5/D5</td>
+    </tr>
+    <tr>
+        <td>🔴 Pessimista</td>
+        <td class="peso">20%</td>
+        <td class="peso" x:num>0.8</td>
+        <td class="formula">=B15*0.8</td>
+        <td class="formula">=MIN(B5,D6*B9)</td>
+        <td class="formula">=E6*B7</td>
+        <td class="formula">=B5/D6</td>
+    </tr>
+</table>
+
+<br>
+
+<table>
+    <tr>
+        <td colspan="2" class="header">ANÁLISE AUTOMÁTICA</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td class="wide">% Venda Período (Realista):</td>
+        <td class="formula">=IF(B5=0,0,E5/B5*100)</td>
+    </tr>
+    <tr>
+        <td>Status Projeção:</td>
+        <td class="formula">=IF(E12&lt;50,"🚨 CRÍTICO",IF(E12&gt;90,"✅ POSITIVO","💡 MODERADO"))</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td class="header">ALERTAS:</td>
+        <td class="header">&nbsp;</td>
+    </tr>
+    <tr>
+        <td colspan="2" class="formula">=IF(E12&lt;50,"🚨 Apenas "&ROUND(E12,0)&"% do estoque em "&B9&" meses",IF(E12&gt;90,"✅ Esgotamento de "&ROUND(E12,0)&"% em "&B9&" meses","💡 Venda moderada de "&ROUND(E12,0)&"% em "&B9&" meses"))</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td>Velocidade Necessária 30%:</td>
+        <td class="formula">=(B5*0.3)/6</td>
+    </tr>
+    <tr>
+        <td>Status Velocidade:</td>
+        <td class="formula">=IF(B6&lt;E18,"❌ INSUFICIENTE","✅ ADEQUADA")</td>
+    </tr>
+</table>
+
+<br><br>
+
+<!-- ABA 3: METODOLOGIA -->
+<h2>PLANILHA 3: METODOLOGIA</h2>
+
+<table>
+    <tr>
+        <td colspan="4" class="header">METODOLOGIA DE AVALIAÇÃO</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td class="header medium">Critério</td>
+        <td class="header narrow">Peso</td>
+        <td class="header wide">Descrição</td>
+        <td class="header medium">Fórmula</td>
+    </tr>
+    <tr>
+        <td class="metodologia">Meta 30% em 6m</td>
+        <td class="metodologia">40%</td>
+        <td class="metodologia">% vendido vs 30% obrigatório</td>
+        <td class="metodologia">10-(Vendido%/30%×10)</td>
+    </tr>
+    <tr>
+        <td class="metodologia">Estoque Crítico</td>
+        <td class="metodologia">25%</td>
+        <td class="metodologia">Unidades restantes vs tempo</td>
+        <td class="metodologia">(Estoque/Meses)÷Vel.Venda</td>
+    </tr>
+    <tr>
+        <td class="metodologia">Concorrência</td>
+        <td class="metodologia">15%</td>
+        <td class="metodologia">Intensidade competitiva</td>
+        <td class="metodologia">Qtd concorrentes × 2,5</td>
+    </tr>
+    <tr>
+        <td class="metodologia">Performance Mensal</td>
+        <td class="metodologia">10%</td>
+        <td class="metodologia">Ritmo vs necessário p/ meta</td>
+        <td class="metodologia">(Vel.Atual/Vel.Nec.)×10</td>
+    </tr>
+    <tr>
+        <td class="metodologia">Sazonalidade</td>
+        <td class="metodologia">10%</td>
+        <td class="metodologia">Período entrega vs ciclo</td>
+        <td class="metodologia">Mês entrega vs histórico</td>
+    </tr>
+</table>
+
+<br>
+
+<table>
+    <tr>
+        <td colspan="3" class="header">CLASSIFICAÇÃO DE RISCO</td>
+    </tr>
+    <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+    <tr>
+        <td class="header narrow">Score</td>
+        <td class="header medium">Status</td>
+        <td class="header wide">Ação</td>
+    </tr>
+    <tr>
+        <td class="risk-baixo">0,0-3,0</td>
+        <td class="risk-baixo">🟢 BAIXO</td>
+        <td class="risk-baixo">Monitoramento padrão</td>
+    </tr>
+    <tr>
+        <td class="risk-medio">3,1-6,0</td>
+        <td class="risk-medio">🟡 MÉDIO</td>
+        <td class="risk-medio">Ações preventivas</td>
+    </tr>
+    <tr>
+        <td class="risk-alto">6,1-8,0</td>
+        <td class="risk-alto">🟠 ALTO</td>
+        <td class="risk-alto">Intervenção necessária</td>
+    </tr>
+    <tr>
+        <td class="risk-critico">8,1-10,0</td>
+        <td class="risk-critico">🔴 CRÍTICO</td>
+        <td class="risk-critico">Ação imediata CEO</td>
+    </tr>
+</table>
+
+<br>
+
+<table>
+    <tr>
+        <td colspan="2" class="regra-critica">⚠️ REGRA CRÍTICA</td>
+    </tr>
+    <tr>
+        <td colspan="2" class="regra-critica">Empreendimentos com &lt;30% vendido em 6+ meses = Score mínimo 6.0 (Alto Risco)</td>
+    </tr>
+</table>
+
+<br><br>
+
+<div style="background-color: #F0F8FF; padding: 15px; border: 2px solid #4472C4; border-radius: 5px;">
+    <h3>📋 INSTRUÇÕES DE IMPORTAÇÃO PARA EXCEL:</h3>
+    <ol style="font-family: Calibri; font-size: 12pt;">
+        <li><strong>Salve este arquivo</strong> como "SimuladorRisco.html" no seu computador</li>
+        <li><strong>Abra o Microsoft Excel</strong></li>
+        <li>Vá em <strong>Dados > Obter Dados > De Outras Fontes > Da Web</strong></li>
+        <li>Clique em <strong>"Procurar"</strong> e selecione o arquivo HTML salvo</li>
+        <li>O Excel detectará automaticamente as tabelas e fórmulas</li>
+        <li><strong>Edite apenas as células amarelas</strong> (campos de entrada)</li>
+        <li>As <strong>células verdes calculam automaticamente</strong> (não altere as fórmulas)</li>
+        <li>Use as <strong>3 planilhas</strong>: Avaliação de Risco, Projeções de Vendas e Metodologia</li>
+    </ol>
+    
+    <h4>🎯 CÉLULAS EDITÁVEIS (Amarelas):</h4>
+    <ul style="font-family: Calibri; font-size: 11pt;">
+        <li>Nome do Empreendimento</li>
+        <li>Total de Unidades, Unidades Vendidas, Meses desde Lançamento</li>
+        <li>Meses até Entrega, Nível Concorrência, Velocidade Atual</li>
+        <li>Ticket Médio, Previsibilidade, Período Projeção</li>
+    </ul>
+    
+    <h4>⚡ FUNCIONALIDADES:</h4>
+    <ul style="font-family: Calibri; font-size: 11pt;">
+        <li>✅ Cálculo automático de score de risco (0-10)</li>
+        <li>✅ Classificação por cores: Verde/Amarelo/Laranja/Vermelho</li>
+        <li>✅ Projeções de vendas em 3 cenários</li>
+        <li>✅ Recomendações automáticas baseadas no score</li>
+        <li>✅ Regra crítica para empreendimentos com baixa performance</li>
+        <li>✅ Alertas visuais e análises detalhadas</li>
+    </ul>
+</div>
+
+</body>
+</html>
